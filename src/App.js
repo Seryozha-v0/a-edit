@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import CardsForm from "./component/cards/CardsForm";
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 function App() {
     const [list, setList] = useState([
@@ -39,23 +41,39 @@ function App() {
             ]
         }
     ]);
-    
+
     const [listItem, setListItem] = useState({});
 
     const handleListItem = (newValue) => {
         setListItem({ ...listItem, [newValue.target.name]: newValue.target.value });
     };
-    
+
     const [listItemEditting, setListItemEditting] = useState(-1);
 
-    const { register, handleSubmit, errors, reset } = useForm({
-        mode: 'onBlur',
+    const schema = yup.object().shape({
+        firstName: yup.string().required('First name is a required field'),
+        lastName: yup.string().required('Last name is a required field'),
+        format: yup.string().required('Select format!'),
     });
 
-    const onSubmit = (data) => {
-        data.sessions = sessions;
-        console.log(data);
-        setList([...list, data]);
+    const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm({
+        mode: 'onBlur',
+        resolver: yupResolver(schema),
+    });
+
+    const onSubmitAdd = (data) => {
+        if (!sessions.length) {
+            console.log(sessions);
+            handleSessionShow();
+            return false;
+        }
+
+        const secList = list.slice();
+        const secListItem = data;
+        secListItem.sessions = sessions;
+        secList.push(secListItem);
+
+        setList(secList.sort((a, b) => a.sessions[0].msTime - b.sessions[0].msTime));
         reset();
         setListItem({});
         setSessions([]);
@@ -65,13 +83,18 @@ function App() {
     const onEdit = (index) => {
         setEditSessionIndex(null);
         setListItemEditting(index);
+
         setListItem(list[index]);
+        for (const key in list[index]) {
+            setValue(key, list[index][key]);
+        }
+
         setSessions(list[index]?.sessions || '');
     };
 
     const onSubmitEdit = (data) => {
         const secList = list.slice();
-        const secListItem = listItem;
+        const secListItem = data;
 
         secListItem.sessions = sessions;
         secList.splice(listItemEditting, 1, secListItem);
@@ -84,14 +107,21 @@ function App() {
     };
 
     //----------------------
-
+    const schemaSession = yup.object().shape({
+        time: yup.string().required('First name is a required field'),
+        price: yup.string().matches(/^(^[0-9]*)$/, `You have to enter numbers`).required('Price is a required field'),
+    });
     const {
         register: registerSession,
         handleSubmit: handleSubmitSession,
-        errors: errorsSession,
+        formState: { errors: errorsSession },
         reset: resetSession,
+        setFocus: setFocusSession,
+        setError: setErrorSession,
+        getValues: getValuesSession,
     } = useForm({
-        mode: 'onBlur',
+        mode: 'all',
+        resolver: yupResolver(schemaSession),
     });
     const [sessions, setSessions] = useState([]);
     const [sessionItem, setSessionItem] = useState({});
@@ -101,6 +131,25 @@ function App() {
 
     const handleSessionShow = () => {
         setSessionShow(!sesseionShow);
+    };
+
+    const checkSessionItemErrors = () => {
+        const data = getValuesSession();
+        if (!sessionItem.time) {
+            console.log(sessionItem);
+            setErrorSession('time', {message: 'Time'});
+            setFocusSession('time');
+            return true;
+        }
+        for (const key in data) {
+            console.log(data[key]);
+            if (data[key] === '') {
+                setFocusSession(key);
+                setErrorSession(key, {message: 'Price'});
+                return true;
+            }
+        }
+        return false;
     };
 
     const handleAddSessionItemTime = (newValue) => {
@@ -148,10 +197,14 @@ function App() {
     };
 
     const onAddSession = () => {
+        if (checkSessionItemErrors()) {
+            return false;
+        }
         console.log(sessionItem);
         const secSessions = sessions;
         secSessions.push(sessionItem);
         setSessions(secSessions.sort((a, b) => a.msTime - b.msTime));
+        resetSession();
         setSessionItem({});
         setViewClock('hours');
     };
@@ -239,6 +292,7 @@ function App() {
                     <CardsForm
                         isEdit={listItemEditting >= 0}
                         register={register}
+                        errors={errors}
                         listItem={listItem}
                         sessions={sessions}
                         sessionEditting={sessionEditting}
@@ -247,6 +301,7 @@ function App() {
                         setViewClock={setViewClock}
                         sessionItem={sessionItem}
                         registerSession={registerSession}
+                        errorsSession={errorsSession}
                         handleAddSessionItemTime={handleAddSessionItemTime}
                         handleAddSessionItem={handleAddSessionItem}
                         handleAddSessionCancel={handleAddSessionCancel}
@@ -261,6 +316,7 @@ function App() {
                 ) : (
                     <CardsForm
                         register={register}
+                        errors={errors}
                         listItem={listItem}
                         sessions={sessions}
                         sessionEditting={sessionEditting}
@@ -269,6 +325,7 @@ function App() {
                         setViewClock={setViewClock}
                         sessionItem={sessionItem}
                         registerSession={registerSession}
+                        errorsSession={errorsSession}
                         handleAddSessionItemTime={handleAddSessionItemTime}
                         handleAddSessionItem={handleAddSessionItem}
                         handleAddSessionCancel={handleAddSessionCancel}
@@ -278,7 +335,7 @@ function App() {
                         handleListItem={handleListItem}
                         handleAddSessionDelete={handleAddSessionDelete}
                         handleAddSessionEditting={handleAddSessionEditting}
-                        onSubmit={handleSubmit(onSubmit)}
+                        onSubmit={handleSubmit(onSubmitAdd)}
                     />
                 )}
 

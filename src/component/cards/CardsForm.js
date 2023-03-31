@@ -7,6 +7,7 @@ import SessionForm from "../sessions/SessionForm";
 const CardsForm = ({
     isEdit,
     register,
+    errors,
     listItem,
     sessions,
     sessionEditting,
@@ -15,6 +16,7 @@ const CardsForm = ({
     setViewClock,
     sessionItem,
     registerSession,
+    errorsSession,
     handleAddSessionItemTime,
     handleAddSessionItem,
     handleAddSessionCancel,
@@ -72,8 +74,11 @@ const CardsForm = ({
                 variant="standard"
                 onChange={(newValue) => handleListItem(newValue)}
                 value={listItem?.firstName}
-                InputLabelProps={{ shrink: Boolean(listItem?.firstName) }}
+                InputLabelProps={{ shrink: !!listItem?.firstName }}
+                error={!!errors.firstName}
+                helperText={errors?.firstName?.message}
             />
+            {console.log(errors)}
             <TextField
                 {...register('lastName')}
                 id="lastName"
@@ -81,7 +86,9 @@ const CardsForm = ({
                 variant="standard"
                 onChange={(newValue) => handleListItem(newValue)}
                 value={listItem?.lastName}
-                InputLabelProps={{ shrink: Boolean(listItem?.lastName) }}
+                InputLabelProps={{ shrink: !!listItem?.lastName }}
+                error={!!errors.lastName}
+                helperText={errors?.lastName?.message}
             />
 
             <FormControl fullWidth>
@@ -93,6 +100,8 @@ const CardsForm = ({
                     value={listItem?.format || ''}
                     label="Format"
                     onChange={(newValue) => handleListItem(newValue)}
+                    error={!!errors.format}
+                    helperText={errors?.format?.message}
                 >
                     <MenuItem value={'2D'}>2D</MenuItem>
                     <MenuItem value={'3D'}>3D</MenuItem>
@@ -100,13 +109,14 @@ const CardsForm = ({
             </FormControl>
 
             <input {...register('sessions')} value={sessions} style={{ display: 'none' }} />
+            
             <Box>
                 <List sx={{ width: '100%' }}>
                     <TransitionGroup>
                         {!Boolean(sessions.length) ? (
                             <Collapse>
-                                <ListItem alignItems="center">
-                                    <Typography variant="body2">You havn't any sessions!</Typography>
+                                <ListItem alignItems="center" error={!!errors.sessions}>
+                                    <Typography variant="body2">You don't have any sessions!</Typography>
                                     <Button type="button" onClick={() => handleSessionShow()}>Add session</Button>
                                 </ListItem>
                             </Collapse>
@@ -127,6 +137,7 @@ const CardsForm = ({
                     setViewClock={setViewClock}
                     sessionItem={sessionItem}
                     registerSession={registerSession}
+                    errorsSession={errorsSession}
                     editting={true}
                     onTime={handleAddSessionItemTime}
                     onItem={handleAddSessionItem}
@@ -140,6 +151,7 @@ const CardsForm = ({
                     setViewClock={setViewClock}
                     sessionItem={sessionItem}
                     registerSession={registerSession}
+                    errorsSession={errorsSession}
                     onTime={handleAddSessionItemTime}
                     onItem={handleAddSessionItem}
                     onCancel={handleAddSessionCancel}

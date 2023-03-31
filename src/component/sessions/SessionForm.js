@@ -9,6 +9,7 @@ const SessionForm = ({
     setViewClock,
     sessionItem,
     registerSession,
+    errorsSession,
     editting,
     onTime,
     onItem,
@@ -40,7 +41,9 @@ const SessionForm = ({
                             variant="outlined"
                             format="HH:mm"
                             onChange={(newValue) => onTime(newValue)}
-                            value={dayjs(`2022-04-17T${sessionItem?.time || '00:00'}`)}
+                            value={sessionItem.time ? dayjs(`2022-04-17T${sessionItem.time}`) : ''}
+                            error={!!errorsSession.time}
+                            helperText={errorsSession?.time?.message}
                         />
                         <TextField
                             {...registerSession('price')}
@@ -53,6 +56,8 @@ const SessionForm = ({
                             InputProps={{
                                 startAdornment: <InputAdornment position="start">₽</InputAdornment>,
                             }}
+                            error={!!errorsSession.price}
+                            helperText={errorsSession?.price?.message}
                         />
                         <Stack spacing={1} direction="row" justifyContent={"space-around"}>
                             <Button type="button" onClick={() => onCancel()} variant="outlined">Close</Button>
