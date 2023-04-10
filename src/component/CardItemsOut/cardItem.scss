@@ -1,0 +1,123 @@
+* {
+    box-sizing: border-box;
+}
+
+.cardItem {
+    position: relative;
+    display: flex;
+    color: #fefefe;
+    min-width: 1200px;
+    margin: 20px;
+
+    &__movie {
+        display: flex;
+        flex-direction: row;
+        background: #121212;
+        border-radius: 7px;
+    }
+
+    &__poster {
+        flex-shrink: 0;
+        position: relative;
+        width: 100px;
+        border-radius: 7px 0 0 7px;
+        overflow: hidden;
+
+        &:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 10px 4px rgba($color: #000000, $alpha: .25);
+            z-index: 1;
+        }
+
+        >img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    &__descr {
+        margin: 10px 15px;
+        min-width: 450px;
+        width: 100%;
+    }
+
+    &__details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        >div {
+            display: flex;
+            flex-direction: row;
+        }
+    }
+
+    &__rate, &__format, &__duration, &__pushkin {
+        margin: 0 5px;
+        padding: 5px 10px;
+        background: #222222;
+        font-weight: 600;
+        border-radius: 5px;
+        text-align: center;
+    }
+
+    &__rate {
+        margin-left: 0;
+    }
+
+    &__pushkin {
+        padding: 2px;
+        font-size: 8px;
+        line-height: 8px;
+        text-transform: uppercase;
+        text-align: left;
+    }
+
+    &__genres {
+        display: flex;
+        text-transform: lowercase;
+
+        >span {
+            margin: 0 3px;
+        }
+    }
+
+    &__name {
+        margin: 10px 0;
+        font-size: 28px;
+        line-height: 30px;
+        text-transform: uppercase;
+    }
+    
+    &__sessions {
+        flex-shrink: 1;
+        display: flex;
+        margin: 20px 0;
+        padding: 20px 15px;
+        width: 100%;
+        position: relative;
+        background: #121212;
+        border-radius: 0 10px 10px 0;
+    }
+
+    &__edit {
+        position: absolute;
+        display: none;
+        top: 0;
+        right: 0;
+    }
+
+    &:hover {
+        .cardItem__edit {
+            display: block;
+        }
+    }
+}
+
+@import url('./sessionItem.scss');
