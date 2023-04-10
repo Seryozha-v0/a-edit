@@ -1,0 +1,80 @@
+@import url('./_fonts.scss');
+
+* {
+    box-sizing: border-box;
+}
+
+.cards {
+    padding: 10px 10px; 
+    background: #121212;
+    color: #fff;
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        margin: 50px 120px;
+        font-family: 'FGBook';
+    }
+
+    &__logo {
+        display: flex;
+        font-size: 80px;
+        font-weight: bold;
+        
+        div:first-child {
+            margin-right: 50px;
+        }
+        div:last-child {
+            position: relative;
+
+            &:before {
+                content: '';
+                position: absolute;
+                top: -20px;
+                left: -20px;
+                right: -20px;
+                bottom: -20px;
+                background: url('../../assets/img/cinema.png') no-repeat;
+                background-size: contain;
+                background-position: 0 2px;
+                z-index: 1;
+            }
+        }
+    }
+
+    &__dates {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-direction: column;
+        font-family: 'FGDemiCond';
+        padding-right: 40px;
+    }
+
+    &__days {
+        font-size: 60px;
+        line-height: 50px;
+    }
+
+    &__months {
+        font-size: 40px;
+        line-height: 40px;
+        text-transform: uppercase;
+        color: #dedede;
+    }
+
+    &__years {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        height: 100%;
+        transform: rotate(90deg);
+        font-size: 40px;
+        line-height: 40px;
+        text-align: center;
+        color: #dedede;
+    }
+    
+}

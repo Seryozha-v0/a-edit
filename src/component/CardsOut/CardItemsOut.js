@@ -2,12 +2,11 @@ import React from "react";
 import './cardItem.scss';
 
 const CardItemsOut = ({
-    aImageRef,
     cards,
     onEdit,
 }) => {
     return (
-        <div ref={aImageRef} style={{ padding: '10px 10px', backgroundColor: '#0A0A0A' }}>
+        <>
             {cards.map((item, i) => (
                 <div key={i} className="cardItem">
                     <div className="cardItem__movie">
@@ -40,7 +39,12 @@ const CardItemsOut = ({
                             <div className="sessionItem" key={sessionKey}>
                                 <div className="sessionItem__time">{sessionItem.time}</div>
                                 <div className="sessionItem__price">
-                                    {sessionItem.price}
+                                    <div className="sessionItem__priceIcon">
+                                        <img src="/assets/icons/price.png" />
+                                    </div>
+                                    <span>
+                                        {sessionItem.price} ₽
+                                    </span>
                                 </div>
                             </div>
                         ))}
@@ -49,7 +53,7 @@ const CardItemsOut = ({
                     <button className="cardItem__edit" onClick={() => onEdit(i)}>Edit item</button>
                 </div>
             ))}
-        </div>
+        </>
     )
 }
 

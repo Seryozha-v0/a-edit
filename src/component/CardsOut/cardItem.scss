@@ -1,19 +1,27 @@
+@import url('./_fonts.scss');
+
 * {
     box-sizing: border-box;
 }
 
 .cardItem {
     position: relative;
+    font-family: 'FGDemiCond';
+    font-size: 24px;
     display: flex;
     color: #fefefe;
-    min-width: 1200px;
+    min-width: 1400px;
     margin: 20px;
 
     &__movie {
+        flex-shrink: 0;
         display: flex;
+        position: relative;
         flex-direction: row;
-        background: #121212;
+        background: #191919;
         border-radius: 7px;
+        box-shadow: 0 0 12px 8px rgba($color: #000000, $alpha: .2);
+        z-index: 1;
     }
 
     &__poster {
@@ -60,8 +68,8 @@
 
     &__rate, &__format, &__duration, &__pushkin {
         margin: 0 5px;
-        padding: 5px 10px;
-        background: #222222;
+        padding: 2.5px 10px;
+        background: #292929;
         font-weight: 600;
         border-radius: 5px;
         text-align: center;
@@ -82,6 +90,9 @@
     &__genres {
         display: flex;
         text-transform: lowercase;
+        font-family: 'FGBook';
+        font-size: 16px;
+        margin-left: 20px;
 
         >span {
             margin: 0 3px;
@@ -98,12 +109,16 @@
     &__sessions {
         flex-shrink: 1;
         display: flex;
+        align-items: center;
+        position: relative;
         margin: 20px 0;
-        padding: 20px 15px;
+        padding: 10px 10px;
         width: 100%;
         position: relative;
-        background: #121212;
+        background: #191919;
         border-radius: 0 10px 10px 0;
+        box-shadow: 0 0 12px 8px rgba($color: #000000, $alpha: .2);
+        z-index: 0;
     }
 
     &__edit {

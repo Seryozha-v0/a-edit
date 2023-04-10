@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import CardsForm from "../component/cards/CardsForm";
-import CardItemsOut from "../component/CardItemsOut/CardItemsOut";
+import CardItemsOut from "../component/CardsOut/CardItemsOut";
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as htmlToImage from 'html-to-image';
@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import dayjs from "dayjs";
 import { useNavigate, useParams } from "react-router-dom";
 import EdittingDates from "../component/Editor/EdittingDates";
+import CardsOut from "../component/CardsOut/CardsOut";
 
 const Editor = () => {
     const Navigate = useNavigate();
@@ -154,10 +155,7 @@ const Editor = () => {
     });
 
     const onSubmitAdd = (data, e) => {
-        console.log(e);
-
         if (!sessions.length) {
-            console.log(sessions);
             handleSessionShow();
             return false;
         }
@@ -187,16 +185,21 @@ const Editor = () => {
     };
 
     const onSubmitEdit = (data) => {
+        if (!sessions.length) {
+            handleSessionShow();
+            return false;
+        }
+
         const secList = list.slice();
         const secListItem = data;
-
         secListItem.sessions = sessions;
-        secList.splice(listItemEditting, 1, secListItem);
-        setList(secList.sort((a, b) => a.sessions[0].msTime - b.sessions[0].msTime));
 
+        secList.splice(listItemEditting, 1, secListItem);
+
+        setList(secList.sort((a, b) => a.sessions[0].msTime - b.sessions[0].msTime));
+        reset();
         setListItem({});
         setSessions([]);
-        reset();
         setListItemEditting(-1);
     };
 
@@ -485,8 +488,9 @@ const Editor = () => {
 
                 <div>
                     <button onClick={downloadImage}>Download image</button>
-                    <CardItemsOut
+                    <CardsOut
                         aImageRef={aImage}
+                        listItemDates={listItemDates}
                         cards={list}
                         onEdit={onEdit}
                     />
