@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import CardsForm from "../component/cards/CardsForm";
-import CardItemsOut from "../component/CardsOut/CardItemsOut";
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as htmlToImage from 'html-to-image';
@@ -9,6 +8,7 @@ import dayjs from "dayjs";
 import { useNavigate, useParams } from "react-router-dom";
 import EdittingDates from "../component/Editor/EdittingDates";
 import CardsOut from "../component/CardsOut/CardsOut";
+import './index.scss';
 
 const Editor = () => {
     const Navigate = useNavigate();
@@ -20,8 +20,6 @@ const Editor = () => {
     //safe progress state
     const [safeSuccess, setSafeSuccess] = useState(false);
     const [safeLoading, setSafeLoading] = useState(false);
-
-
 
 
     //change listItemDates from DataPicker
@@ -77,8 +75,10 @@ const Editor = () => {
     };
 
     const handleMovieDuration = (newValue) => {
-        const timeText = `${newValue.$H.toString().padStart(2, '0')}:${newValue.$m.toString().padStart(2, '0')}`;
-        setListItem({...listItem, movieDuration: timeText});
+        const hours = newValue.$H || 0;
+        const minutes = newValue.$m || 0;
+        const timeText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        setListItem({ ...listItem, duration: timeText });
         setValue('duration', timeText);
     };
 
@@ -99,14 +99,7 @@ const Editor = () => {
         }
         setIsLoading(true);
     }, [Params]);
-
-    // useEffect(() => {
-    //     const onKeypress = e => console.log(e);
-
-    //     document.addEventListener('keypress', onKeypress);
-
-    //     return () => document.removeEventListener('keypress', onKeypress);
-    // }, []);
+    
 
 
 
@@ -128,7 +121,7 @@ const Editor = () => {
 
     const handleListItem = (newValue, e, fieldName) => {
         if (e) {
-            console.log({[e.target.id.split('-')[0]]: newValue});
+            console.log({ [e.target.id.split('-')[0]]: newValue });
             setListItem({ ...listItem, [e.target.id.split('-')[0]]: newValue });
             setValue(e.target.id.split('-')[0], newValue);
         } else if (fieldName) {
@@ -142,7 +135,7 @@ const Editor = () => {
     const [listItemEditting, setListItemEditting] = useState(-1);
 
     const schema = yup.object().shape({
-        movieImageUrl: yup.string().required('Please past movie umage url'),
+        movieImageUrl: yup.string().required('Please past the movie\'s image url'),
         movieName: yup.string().required('Movie name is a required field'),
         movieRate: yup.string().required('Select rate!'),
         movieFormat: yup.string().required('Select format!'),
@@ -173,7 +166,6 @@ const Editor = () => {
 
 
     const onEdit = (index) => {
-        setEditSessionIndex(null);
         setListItemEditting(index);
 
         setListItem(list[index]);
@@ -203,17 +195,23 @@ const Editor = () => {
         setListItemEditting(-1);
     };
 
+    const onRemove = (index) => {
+        const secList = list.slice();
+
+        secList.splice(index, 1);
+
+        setList(secList.sort((a, b) => a.sessions[0].msTime - b.sessions[0].msTime));
+        reset();
+        setListItem({});
+        setSessions([]);
+        setListItemEditting(-1);
+    };
+
     if (localStorage.getItem('list')) {
         const jsonList = localStorage.getItem('list');
         const obj = JSON.parse(jsonList);
         console.log(obj);
     }
-
-    useEffect(() => {
-        setDateStart(dayjs(listItemDates.dateStart));
-        setDateEnd(dayjs(listItemDates.dateEnd));
-        setDateRange(`${dayjs(listItemDates.dateStart).format('DD.MM.YYYY')}-${dayjs(listItemDates.dateEnd).format('DD.MM.YYYY')}`);
-    }, [listItemDates]);
 
     //----------------------
     const schemaSession = yup.object().shape({
@@ -318,86 +316,10 @@ const Editor = () => {
         setViewClock('hours');
     };
 
-    //---------------------
-
-    const [editInlineSessionIndex, setEditInlineSessionIndex] = useState(-1);
-    const [editInlineSessionData, setEditInlineSessionData] = useState({});
-
-    const handleEditInlineSession = (index, data) => {
-        if (editSessionIndex >= 0) {
-            resetSession();
-        }
-
-        setEditInlineSessionIndex(index);
-        setEditInlineSessionData(data);
-    };
-    const handleInlineSessionItem = (e) => {
-        setEditInlineSessionData({ ...editInlineSessionData, [e.target.name]: e.target.value });
-    };
-
-    const onSubmitEditInlineSession = () => {
-        const secSessions = sessions.slice();
-
-        secSessions.splice(editInlineSessionIndex, 1, editInlineSessionData);
-
-        setSessions(secSessions);
-        setEditInlineSessionIndex(null);
-    };
-
-    const handleInlineItemDeleteSession = (childIndex) => {
-        const secSessions = sessions.slice();
-        secSessions.splice(childIndex, 1);
-
-        if (editInlineSessionIndex >= 0) {
-            resetSession();
-            setEditInlineSessionIndex(-1);
-        }
-
-        setSessions(secSessions);
-    };
-
-    //--------------------
-    const [editSessionIndex, setEditSessionIndex] = useState({});
-    const [editSessionData, setEditSessionData] = useState({});
-
-    const handleEditSession = (index, data, parIndex) => {
-        if (editSessionIndex) {
-            resetSession();
-        }
-
-        setEditSessionData(data);
-        setEditSessionIndex({ parrent: parIndex, child: index });
-    };
-
-    const handleSessionItem = (e) => {
-        setEditSessionData({ ...editSessionData, [e.target.name]: e.target.value });
-    };
-
-    const onSubmitEditSession = () => {
-        const secList = list.slice();
-
-        secList[editSessionIndex.parrent].sessions.splice(editSessionIndex.child, 1, editSessionData);
-
-        setList(secList);
-        setEditSessionIndex({});
-    };
-
-    const handleItemDeleteSession = (parIndex, childIndex) => {
-        const secList = list.slice();
-        secList[parIndex].sessions.splice(childIndex, 1);
-        if (editSessionIndex) {
-            resetSession();
-            setEditSessionIndex({});
-        }
-
-        setList(secList);
-    };
-
-
     //image
     const aImage = useRef();
     const downloadImage = async () => {
-        await htmlToImage.toJpeg(aImage.current, { pixelRatio: 2 })
+        await htmlToImage.toJpeg(aImage.current, { cacheBust: true, pixelRatio: 2 })
             .then((dataUrl) => {
                 const link = document.createElement('a');
                 link.download = 'a-edit.jpeg';
@@ -406,10 +328,45 @@ const Editor = () => {
             });
     };
 
-    //datePicker
-    const [dateRange, setDateRange] = useState('');
-    const [dateStart, setDateStart] = useState();
-    const [dateEnd, setDateEnd] = useState();
+    //movie data from kinopoisk
+    const [kinopiskUrl, setKinopoiskUrl] = useState('');
+    const [isLoadData, setIsLoadData] = useState(false);
+    const getFromKinopisk = () => {
+        const id = kinopiskUrl.match(/[\d]+/)[0];
+        console.log(id);
+        fetch(`https://kinopoiskapiunofficial.tech/api/v2.2/films/${id}`, {
+            method: 'GET',
+            headers: {
+                'X-API-KEY': '8bd06ad0-1988-456c-9cf4-5525aedfede7',
+                'Content-Type': 'application/json',
+            },
+        })
+          .then(res => res.json())
+          .then(json => {
+            const durTime = new Date(0);
+            durTime.setMinutes(169);
+            const rate = json.ratingAgeLimits.match(/[\d]+/)[0] + '+';
+
+            const timeText = `${durTime.getUTCHours().toString().padStart(2, '0')}:${durTime.getUTCMinutes().toString().padStart(2, '0')}`;
+
+            setListItem({
+                ...listItem,
+                // movieImageUrl: json.posterUrl,
+                movieName: json.nameRu,
+                movieRate: rate,
+                movieGenres: [json.genres[0].genre, json.genres[1].genre],
+                duration: timeText,
+            });
+            // setValue('movieImageUrl', json.posterUrl);
+            setValue('movieName', json.nameRu);
+            setValue('movieRate', rate);
+            setValue('movieGenres', [json.genres[0].genre, json.genres[1].genre]);
+            setValue('duration', timeText);
+            console.log(json);
+            console.log([json.genres[0].genre, json.genres[1].genre]);
+          })
+          .catch(err => console.log(err));
+    };
 
     return (
         <>
@@ -427,13 +384,16 @@ const Editor = () => {
                 )}
             </div>
             <div style={{ display: 'flex' }}>
-                <div style={{ width: '50%', margin: '10px 15px' }}>
+                <div style={{ width: '40%' }}>
 
                     {listItemEditting >= 0 ? (
                         <CardsForm
                             isEdit={listItemEditting >= 0}
                             register={register}
                             errors={errors}
+                            kinopiskUrl={kinopiskUrl}
+                            setKinopoiskUrl={setKinopoiskUrl}
+                            getFromKinopisk={getFromKinopisk}
                             listItem={listItem}
                             sessions={sessions}
                             sessionEditting={sessionEditting}
@@ -460,6 +420,9 @@ const Editor = () => {
                         <CardsForm
                             register={register}
                             errors={errors}
+                            kinopiskUrl={kinopiskUrl}
+                            setKinopoiskUrl={setKinopoiskUrl}
+                            getFromKinopisk={getFromKinopisk}
                             listItem={listItem}
                             sessions={sessions}
                             sessionEditting={sessionEditting}
@@ -486,14 +449,17 @@ const Editor = () => {
 
                 </div>
 
-                <div>
+                <div style={{ width: '60%', overflow: 'scroll' }}>
                     <button onClick={downloadImage}>Download image</button>
-                    <CardsOut
-                        aImageRef={aImage}
-                        listItemDates={listItemDates}
-                        cards={list}
-                        onEdit={onEdit}
-                    />
+                    <div className="cards-wrap">
+                        <CardsOut
+                            aImageRef={aImage}
+                            listItemDates={listItemDates}
+                            cards={list}
+                            onEdit={onEdit}
+                            onRemove={onRemove}
+                        />
+                    </div>
                 </div>
             </div>
         </>

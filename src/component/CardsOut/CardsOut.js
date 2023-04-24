@@ -7,6 +7,7 @@ const CardsOut = ({
     cards,
     listItemDates,
     onEdit,
+    onRemove,
 }) => {
     const { dateStart, dateEnd } = listItemDates;
 
@@ -68,6 +69,7 @@ const CardsOut = ({
             <CardItemsOut
                 cards={cards}
                 onEdit={onEdit}
+                onRemove={onRemove}
             />
         </div>
     )

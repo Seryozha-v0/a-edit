@@ -1,13 +1,14 @@
-@import url('./_fonts.scss');
-
-* {
-    box-sizing: border-box;
+.cards-wrap {
+    position: relative;
+    // overflow: scroll;
+    transform: translate(-15%, -15%) scale(70%);
 }
 
 .cards {
     padding: 10px 10px; 
     background: #121212;
     color: #fff;
+    min-width: 1400px;
 
     &__header {
         display: flex;

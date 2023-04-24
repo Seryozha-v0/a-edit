@@ -29,12 +29,14 @@ const EdittingDates = ({
         <Box>
             <Stack spacing={2} direction='row' sx={{ display: 'flex', alignItems: 'center' }}>
                 <DatePicker
+                    inputFormat="dd/MM/yyyy"
                     label="Start date"
                     value={dateStart}
                     onChange={(newValue) => handleItemDate(newValue, 'dateStart')}
                 />
 
                 <DatePicker
+                    inputFormat="dd/MM/yyyy"
                     label="End date"
                     value={dateEnd}
                     onChange={(newValue) => handleItemDate(newValue, 'dateEnd')}

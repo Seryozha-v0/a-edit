@@ -19,9 +19,9 @@ const SessionForm = ({
     return (
         <Box>
             <Collapse in={isShow}>
-                <Stack spacing={1} direction="row" justifyContent={"space-around"}>
-                    <Stack spacing={1} direction="row" justifyContent={"space-around"}>
-                        <Stack spacing={1} direction="column" justifyContent={"center"}>
+                <Stack direction="row" justifyContent={"space-around"}>
+                    <Stack direction="column" justifyContent={"space-around"}>
+                        <Stack spacing={1} direction="row" justifyContent={"center"}>
                             <Button type="button" onClick={() => setViewClock('hours')}>hours</Button>
                             <Button type="button" onClick={() => setViewClock('minutes')}>minutes</Button>
                         </Stack>
@@ -32,7 +32,7 @@ const SessionForm = ({
                             ampm={false}
                         />
                     </Stack>
-                    <Stack spacing={1} direction="column" justifyContent={"space-around"}>
+                    <Stack spacing={2} direction="column" justifyContent={"center"}>
                         <TimeField
                             {...registerSession('time')}
                             id="time"
@@ -59,10 +59,10 @@ const SessionForm = ({
                             error={!!errorsSession.price}
                             helperText={errorsSession?.price?.message}
                         />
-                        <Stack spacing={1} direction="row" justifyContent={"space-around"}>
+                        <Stack direction="row" justifyContent={"space-around"}>
                             <Button type="button" onClick={() => onCancel()} variant="outlined">Close</Button>
                             <Button type="button" onClick={() => onSubmit()} variant="contained">
-                                {editting ? ('Edit Session') : ('Add Session')}
+                                {editting ? ('Edit') : ('Add')}
                             </Button>
                         </Stack>
                     </Stack>
