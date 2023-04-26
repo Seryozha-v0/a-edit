@@ -39,7 +39,7 @@ const CardsOut = ({
                 return 'Декабрь';
 
             default:
-                break;
+                return '';
         }
     };
 
@@ -47,11 +47,11 @@ const CardsOut = ({
         <div ref={aImageRef} className="cards">
             <div className="cards__header">
                 <div className="cards__logo">
-                    <div>Кинотетар</div>
+                    <div>Кинотеатр</div>
                     <div>МИР</div>
                 </div>
                 <div className="cards__dates">
-                    {dateStart && dateEnd && (
+                    {(dateStart?.$y && dateEnd?.$y) ? (
                         <>
                             <div className="cards__days">
                                 {dateStart.$D === dateEnd.$D ? dateStart.$D.toString().padStart(2, '0') : `${dateStart.$D.toString().padStart(2, '0')}-${dateEnd.$D.toString().padStart(2, '0')}`}
@@ -59,11 +59,16 @@ const CardsOut = ({
                             <div className="cards__months">
                                 {dateStart.$M === dateEnd.$M ? getMonth(dateStart.$M) : `${getMonth(dateStart.$M).substring(0, 3)}-${getMonth(dateEnd.$M).substring(0, 3)}`}
                             </div>
-                            <div className="cards__years">
-                                {dateStart.$y === dateEnd.$y ? dateStart.$y : `${dateStart.$y}-${dateEnd.$y}`}
+                            <div className={`cards__years${dateStart.$y != dateEnd.$y ? ' cards__years_up' : ''}`}>
+                                {dateStart.$y === dateEnd.$y ? dateStart.$y : (
+                                    <>
+                                        <div>{dateStart.$y}</div>
+                                        <div>{dateEnd.$y}</div>
+                                    </>
+                                )}
                             </div>
                         </>
-                    )}
+                    ) : ''}
                 </div>
             </div>
             <CardItemsOut

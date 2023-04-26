@@ -16,7 +16,10 @@ const Editor = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const [lists, setLists] = useState([]);
-    const [listItemDates, setListItemDates] = useState({});
+    const [listItemDates, setListItemDates] = useState({
+        dateStart: null,
+        dateEnd: null,
+    });
     //safe progress state
     const [safeSuccess, setSafeSuccess] = useState(false);
     const [safeLoading, setSafeLoading] = useState(false);
@@ -78,12 +81,12 @@ const Editor = () => {
         const hours = newValue.$H || 0;
         const minutes = newValue.$m || 0;
         const timeText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-        setListItem({ ...listItem, duration: timeText });
+        setMovieCard({ ...movieCard, duration: timeText });
         setValue('duration', timeText);
     };
 
     const handleMovieChacked = (e) => {
-        setListItem({ ...listItem, [e.target.id]: e.target.checked });
+        setMovieCard({ ...movieCard, [e.target.id]: e.target.checked });
         setValue(e.target.id, e.target.checked);
     };
 
@@ -99,7 +102,7 @@ const Editor = () => {
         }
         setIsLoading(true);
     }, [Params]);
-    
+
 
 
 
@@ -117,18 +120,17 @@ const Editor = () => {
 
     const [list, setList] = useState([]);
 
-    const [listItem, setListItem] = useState({});
+    const [movieCard, setMovieCard] = useState({});
 
     const handleListItem = (newValue, e, fieldName) => {
         if (e) {
-            console.log({ [e.target.id.split('-')[0]]: newValue });
-            setListItem({ ...listItem, [e.target.id.split('-')[0]]: newValue });
+            setMovieCard({ ...movieCard, [e.target.id.split('-')[0]]: newValue });
             setValue(e.target.id.split('-')[0], newValue);
         } else if (fieldName) {
-            setListItem({ ...listItem, [fieldName]: newValue });
+            setMovieCard({ ...movieCard, [fieldName]: newValue });
             setValue(fieldName, newValue);
         } else {
-            setListItem({ ...listItem, [newValue.target.name]: newValue.target.value });
+            setMovieCard({ ...movieCard, [newValue.target.name]: newValue.target.value });
         }
     };
 
@@ -142,7 +144,7 @@ const Editor = () => {
         duration: yup.string().required('Enter duration!'),
     });
 
-    const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm({
+    const { register, handleSubmit, formState: { errors }, reset, setValue, setFocus, setError } = useForm({
         mode: 'onBlur',
         resolver: yupResolver(schema),
     });
@@ -160,7 +162,7 @@ const Editor = () => {
 
         setList(secList.sort((a, b) => a.sessions[0].msTime - b.sessions[0].msTime));
         reset();
-        setListItem({});
+        setMovieCard({});
         setSessions([]);
     };
 
@@ -168,7 +170,7 @@ const Editor = () => {
     const onEdit = (index) => {
         setListItemEditting(index);
 
-        setListItem(list[index]);
+        setMovieCard(list[index]);
         for (const key in list[index]) {
             setValue(key, list[index][key]);
         }
@@ -190,7 +192,7 @@ const Editor = () => {
 
         setList(secList.sort((a, b) => a.sessions[0].msTime - b.sessions[0].msTime));
         reset();
-        setListItem({});
+        setMovieCard({});
         setSessions([]);
         setListItemEditting(-1);
     };
@@ -202,7 +204,7 @@ const Editor = () => {
 
         setList(secList.sort((a, b) => a.sessions[0].msTime - b.sessions[0].msTime));
         reset();
-        setListItem({});
+        setMovieCard({});
         setSessions([]);
         setListItemEditting(-1);
     };
@@ -329,43 +331,62 @@ const Editor = () => {
     };
 
     //movie data from kinopoisk
-    const [kinopiskUrl, setKinopoiskUrl] = useState('');
     const [isLoadData, setIsLoadData] = useState(false);
-    const getFromKinopisk = () => {
-        const id = kinopiskUrl.match(/[\d]+/)[0];
-        console.log(id);
-        fetch(`https://kinopoiskapiunofficial.tech/api/v2.2/films/${id}`, {
+
+    const getFromKinoDev = () => {
+        if (!movieCard.kinopoiskUrl) {
+            setError('kinopoiskUrl', { message: 'Please, enter the URL' });
+            setFocus('kinopoiskUrl');
+            return false;
+        } else if (!movieCard.kinopoiskUrl.match(/kinopoisk/)) {
+            setError('kinopoiskUrl', { message: 'Invalid URL!' });
+            setFocus('kinopoiskUrl');
+            return false;
+        }
+        setIsLoadData(true);
+
+        const id = movieCard.kinopoiskUrl.match(/[\d]+/)[0];
+        fetch(`https://api.kinopoisk.dev/v1/movie/${id}`, {
             method: 'GET',
             headers: {
-                'X-API-KEY': '8bd06ad0-1988-456c-9cf4-5525aedfede7',
+                'X-API-KEY': 'XFP5H8X-Y48446X-NXCTEV2-XATNMW1',
                 'Content-Type': 'application/json',
             },
         })
-          .then(res => res.json())
-          .then(json => {
-            const durTime = new Date(0);
-            durTime.setMinutes(169);
-            const rate = json.ratingAgeLimits.match(/[\d]+/)[0] + '+';
+            .then(data => data.json())
+            .then(data => {
+                console.log(data);
+                const { poster, name, ageRating, movieLength, genres } = data;
 
-            const timeText = `${durTime.getUTCHours().toString().padStart(2, '0')}:${durTime.getUTCMinutes().toString().padStart(2, '0')}`;
+                const durTime = new Date(0);
+                durTime.setMinutes(movieLength);
+                const duration = `${durTime.getUTCHours().toString().padStart(2, '0')}:${durTime.getUTCMinutes().toString().padStart(2, '0')}`;
 
-            setListItem({
-                ...listItem,
-                // movieImageUrl: json.posterUrl,
-                movieName: json.nameRu,
-                movieRate: rate,
-                movieGenres: [json.genres[0].genre, json.genres[1].genre],
-                duration: timeText,
+                const movieRate = `${ageRating}+`;
+
+                const movieGenres = [];
+                genres.forEach(el => movieGenres.push(el.name));
+
+                setMovieCard({
+                    ...movieCard,
+                    movieImageUrl: poster.url,
+                    movieName: name,
+                    movieRate: movieRate,
+                    movieGenres: movieGenres,
+                    duration: duration,
+                });
+                setValue('movieImageUrl', poster.url);
+                setValue('movieName', name);
+                setValue('movieRate', movieRate);
+                setValue('movieGenres', movieGenres);
+                setValue('duration', duration);
+
+                setIsLoadData(false);
+            })
+            .catch(err => {
+                console.log(err);
+                setIsLoadData(false);
             });
-            // setValue('movieImageUrl', json.posterUrl);
-            setValue('movieName', json.nameRu);
-            setValue('movieRate', rate);
-            setValue('movieGenres', [json.genres[0].genre, json.genres[1].genre]);
-            setValue('duration', timeText);
-            console.log(json);
-            console.log([json.genres[0].genre, json.genres[1].genre]);
-          })
-          .catch(err => console.log(err));
     };
 
     return (
@@ -391,10 +412,9 @@ const Editor = () => {
                             isEdit={listItemEditting >= 0}
                             register={register}
                             errors={errors}
-                            kinopiskUrl={kinopiskUrl}
-                            setKinopoiskUrl={setKinopoiskUrl}
-                            getFromKinopisk={getFromKinopisk}
-                            listItem={listItem}
+                            getFromKinoDev={getFromKinoDev}
+                            isLoadData={isLoadData}
+                            movieCard={movieCard}
                             sessions={sessions}
                             sessionEditting={sessionEditting}
                             sesseionShow={sesseionShow}
@@ -420,10 +440,9 @@ const Editor = () => {
                         <CardsForm
                             register={register}
                             errors={errors}
-                            kinopiskUrl={kinopiskUrl}
-                            setKinopoiskUrl={setKinopoiskUrl}
-                            getFromKinopisk={getFromKinopisk}
-                            listItem={listItem}
+                            getFromKinoDev={getFromKinoDev}
+                            isLoadData={isLoadData}
+                            movieCard={movieCard}
                             sessions={sessions}
                             sessionEditting={sessionEditting}
                             sesseionShow={sesseionShow}

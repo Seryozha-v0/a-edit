@@ -1,5 +1,5 @@
 import { Check, Save } from "@mui/icons-material";
-import { Box, Button, CircularProgress, Fab, Stack } from "@mui/material";
+import { Box, Button, CircularProgress, Fab, Stack, TextField } from "@mui/material";
 import { green } from "@mui/material/colors";
 import { DatePicker } from "@mui/x-date-pickers";
 import React from "react";
@@ -29,17 +29,16 @@ const EdittingDates = ({
         <Box>
             <Stack spacing={2} direction='row' sx={{ display: 'flex', alignItems: 'center' }}>
                 <DatePicker
-                    inputFormat="dd/MM/yyyy"
                     label="Start date"
                     value={dateStart}
                     onChange={(newValue) => handleItemDate(newValue, 'dateStart')}
                 />
 
                 <DatePicker
-                    inputFormat="dd/MM/yyyy"
                     label="End date"
                     value={dateEnd}
                     onChange={(newValue) => handleItemDate(newValue, 'dateEnd')}
+                    minDate={dateStart}
                 />
 
                 <Box sx={{ position: 'relative' }}>

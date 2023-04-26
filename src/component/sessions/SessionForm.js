@@ -41,7 +41,7 @@ const SessionForm = ({
                             variant="outlined"
                             format="HH:mm"
                             onChange={(newValue) => onTime(newValue)}
-                            value={sessionItem.time ? dayjs(`2022-04-17T${sessionItem.time}`) : ''}
+                            value={sessionItem.time ? dayjs(`2022-04-17T${sessionItem.time}`) : null}
                             error={!!errorsSession.time}
                             helperText={errorsSession?.time?.message}
                         />

@@ -1,5 +1,6 @@
 import { Delete, Edit } from "@mui/icons-material";
-import { Autocomplete, Box, Button, Checkbox, Collapse, FormControl, FormControlLabel, IconButton, ImageList, ImageListItem, InputLabel, List, ListItem, ListItemText, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Checkbox, CircularProgress, Collapse, FormControl, FormControlLabel, IconButton, ImageList, ImageListItem, InputLabel, List, ListItem, ListItemText, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import { green } from "@mui/material/colors";
 import { TimeField } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import React from "react";
@@ -11,10 +12,9 @@ const CardsForm = ({
     isEdit,
     register,
     errors,
-    kinopiskUrl,
-    setKinopoiskUrl,
-    getFromKinopisk,
-    listItem,
+    getFromKinoDev,
+    isLoadData,
+    movieCard,
     sessions,
     sessionEditting,
     sesseionShow,
@@ -36,6 +36,15 @@ const CardsForm = ({
     handleAddSessionEditting,
     onSubmit,
 }) => {
+    const getDatasBtnSx = {
+        ...(isLoadData && {
+            bgcolor: green[500],
+            '&:hover': {
+                bgcolor: green[700],
+            },
+        }),
+    }
+
     const renderSessionItem = (item, index) => {
         return (
             <ListItem
@@ -67,23 +76,6 @@ const CardsForm = ({
 
     return (
         <>
-            <Stack
-                sx={{
-                    '& > :not(style)': { m: 2 },
-                }}
-                direction='row'
-                justifyContent='space-between'
-            >
-                <TextField
-                    id="kinopoiskURL"
-                    label="Kinopoisk URL"
-                    variant="standard"
-                    sx={{ width: '100%' }}
-                    value={kinopiskUrl}
-                    onChange={(newValue) => setKinopoiskUrl(newValue.target.value)}
-                />
-                <Button onClick={getFromKinopisk} sx={{ flexShrink: 0 }}>Get datas</Button>
-            </Stack>
             <Box
                 component="form"
                 sx={{
@@ -94,31 +86,70 @@ const CardsForm = ({
                 autoComplete="off"
                 onSubmit={onSubmit}
             >
-                <TextField
-                    {...register('movieImageUrl')}
-                    id="movieImageUrl"
-                    label="Movie image"
-                    variant="standard"
-                    onChange={(newValue) => handleListItem(newValue)}
-                    value={listItem?.movieImageUrl}
-                    InputLabelProps={{ shrink: !!listItem?.movieImageUrl }}
-                    error={!!errors.movieImageUrl}
-                    helperText={errors?.movieImageUrl?.message}
-                />
+                <Stack
+                    direction='row'
+                    justifyContent='space-between'
+                >
+                    <TextField
+                        {...register('kinopoiskUrl')}
+                        id="kinopoiskUrl"
+                        label="Kinopoisk URL"
+                        variant="standard"
+                        sx={{ width: '100%' }}
+                        value={movieCard?.kinopoiskUrl || ''}
+                        onChange={(newValue) => handleListItem(newValue)}
+                        error={!!errors.kinopoiskUrl}
+                        helperText={errors?.kinopoiskUrl?.message}
+                    />
+                    <Box sx={{ position: 'relative', flexShrink: 0 }}>
+                        <Button
+                            onClick={getFromKinoDev}
+                            sx={getDatasBtnSx}
+                            variant='contained'
+                        >
+                            Get datas
+                        </Button>
+                        {isLoadData && (
+                            <CircularProgress
+                                size={24}
+                                sx={{
+                                    color: green[300],
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    marginTop: '-12px',
+                                    marginLeft: '-12px',
+                                }}
+                            />
+                        )}
+                    </Box>
+                </Stack>
 
-                <Box>
-                    <ImageList sx={{ width: '100%' }}>
+                <Stack duration='column'>
+                    <TextField
+                        {...register('movieImageUrl')}
+                        id="movieImageUrl"
+                        label="Movie image"
+                        variant="standard"
+                        onChange={(newValue) => handleListItem(newValue)}
+                        value={movieCard?.movieImageUrl || ''}
+                        InputLabelProps={{ shrink: !!movieCard?.movieImageUrl }}
+                        error={!!errors.movieImageUrl}
+                        helperText={errors?.movieImageUrl?.message}
+                    />
+
+                    <ImageList sx={{ width: '100%', m: (!!movieCard.movieImageUrl ? 1 : 0) }}>
                         <TransitionGroup>
-                            {!!listItem.movieImageUrl && (
+                            {!!movieCard.movieImageUrl && (
                                 <Collapse>
                                     <ImageListItem>
-                                        <img src={listItem.movieImageUrl} width="150px" height='150px' loading="lazy" />
+                                        <img src={movieCard.movieImageUrl} width="150px" height='150px' loading="lazy" />
                                     </ImageListItem>
                                 </Collapse>
                             )}
                         </TransitionGroup>
                     </ImageList>
-                </Box>
+                </Stack>
 
                 <TextField
                     {...register('movieName')}
@@ -126,8 +157,8 @@ const CardsForm = ({
                     label="Movie name"
                     variant="standard"
                     onChange={(newValue) => handleListItem(newValue)}
-                    value={listItem?.movieName}
-                    InputLabelProps={{ shrink: !!listItem?.movieName }}
+                    value={movieCard?.movieName || ''}
+                    InputLabelProps={{ shrink: !!movieCard?.movieName }}
                     error={!!errors.movieName}
                     helperText={errors?.movieName?.message}
                 />
@@ -138,7 +169,7 @@ const CardsForm = ({
                         disableClearable
                         id="movieRate"
                         options={['0+', '6+', '12+', '16+', '18+', '21+']}
-                        value={listItem?.movieRate || null}
+                        value={movieCard?.movieRate || null}
                         onChange={(e, newValue) => handleListItem(newValue, e)}
                         sx={{ width: 150 }}
                         renderInput={(params) => (
@@ -157,7 +188,7 @@ const CardsForm = ({
                         disableClearable
                         id="movieFormat"
                         options={['2D', '3D']}
-                        value={listItem?.movieFormat || null}
+                        value={movieCard?.movieFormat || null}
                         onChange={(e, newValue) => handleListItem(newValue, e)}
                         sx={{ width: 150 }}
                         renderInput={(params) => (
@@ -178,7 +209,7 @@ const CardsForm = ({
                         variant="outlined"
                         format="HH:mm"
                         onChange={(newValue) => handleMovieDuration(newValue)}
-                        value={listItem.duration ? dayjs(`2022-04-17T${listItem.duration}`) : ''}
+                        value={movieCard.duration ? dayjs(`2022-04-17T${movieCard.duration}`) : null}
                         sx={{ width: 150 }}
                         // color='error'
                         error={!!errorsSession.duration}
@@ -192,7 +223,7 @@ const CardsForm = ({
                         id='movieGenres'
                         options={genres.sort()}
                         sx={{ width: '100%' }}
-                        value={listItem?.movieGenres || []}
+                        value={movieCard?.movieGenres || []}
                         onChange={(e, newValue) => handleListItem(newValue, false, 'movieGenres')}
                         renderInput={(params) => (
                             <TextField
@@ -209,7 +240,7 @@ const CardsForm = ({
                             <Checkbox
                                 {...register('pushkin')}
                                 id='pushkin'
-                                checked={listItem.pushkin || null}
+                                checked={movieCard.pushkin || false}
                                 onChange={(e) => handleMovieChacked(e)}
                             />
                         }
@@ -226,10 +257,10 @@ const CardsForm = ({
                                 <Collapse>
                                     <ListItem alignItems="center" error={!!errors.sessions}>
                                         <Typography variant="body2">You don't have any sessions!</Typography>
-                                        <Button type="button" onClick={() => handleSessionShow()}>Add session</Button>
+                                        <Button type="button" onClick={() => handleSessionShow()}>{sesseionShow ? 'Close session form' : 'Add session'}</Button>
                                     </ListItem>
                                 </Collapse>
-                            ) : (<Button type="button" onClick={() => handleSessionShow()}>Add session</Button>)}
+                            ) : (<Button type="button" onClick={() => handleSessionShow()}>{sesseionShow ? 'Close session form' : 'Add session'}</Button>)}
                             {sessions.map((item, i) => (
                                 <Collapse key={i}>
                                     {renderSessionItem(item, i)}
@@ -268,7 +299,7 @@ const CardsForm = ({
                     />
                 )}
 
-                <Stack sx={{position: 'sticky', bottom: 0, background: '#fff', p: 1, zIndex: 10}}>
+                <Stack sx={{ position: 'sticky', bottom: 0, background: '#fff', p: 1, zIndex: 10 }}>
                     <Button type="submit" variant="contained">
                         {isEdit ? ('Edit Card') : ('Add Card')}
                     </Button>
